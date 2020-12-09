@@ -1,0 +1,104 @@
+PSS
+
+101,data1, rs1
+102,data2, rs1
+103,data3, rs1
+
+mongod --port 101 --dbpath "C:\Users\Administrator\Desktop\replication\data1" --replSet rs1
+
+mongod --port 102 --dbpath "C:\Users\Administrator\Desktop\replication\data2" --replSet rs1
+
+mongod --port 103 --dbpath "C:\Users\Administrator\Desktop\replication\data3" --replSet rs1
+
+mongo --port 101
+In the mongo shell
+rs.initiate({
+_id:"rs1",
+members:[
+{_id:0,host:"localhost:101"},
+{_id:1,host:"localhost:102"},
+{_id:2,host:"localhost:103"}]
+})
+
+
+
+var myConfig=rs.config()
+myConfig.settings.heartbeatIntervalMillis=10000
+rs.reconfig(myConfig)
+
+Add an arbiter
+104,data4, rs1
+
+mongod --port 104 --dbpath "C:\Users\Administrator\Desktop\replication\data4" --replSet rs1
+
+
+
+
+PSSSS
+
+write concern : majority
+5 node ; majority :3
+db.emp.insert({empId:101})
+3 nodes write it successfully to their data ; then only its termed as success
+
+3 sec nodes are down
+db.emp.insert({empId:101})
+nInserted:0; 
+
+write concern :1
+Primary has to finish writing to get the success message
+
+write concern :2
+PS
+
+Add an arbiter
+104,data4, rs1
+
+mongod --port 104 --dbpath "C:\Users\Administrator\Desktop\replication\data4" --replSet rs1
+
+Connect mongo to the primary
+rs.addArb("localhost:104")
+
+
+Add a normal secondary{vote:1, priority:1}
+
+mongod --port 105 --dbpath "C:\Users\Administrator\Desktop\replication\data5" --replSet rs1
+
+rs.add("localhost:105")
+
+Two ways to set the priority
+1.
+rs.add({host:"localhost:105",priority:0})
+2.
+var myConfig=rs.config()
+myConfig.members[4].priority=0
+rs.reconfig(myconfig)
+
+
+after 100 secs, 101 will not become primary
+
+
+Add a hidden member
+mongod --port 106 --dbpath "C:\Users\Administrator\Desktop\replication\data6" --replSet rs1
+rs.add({host:"localhost:106",hidden:true,priority:0})
+
+Add a delayed member
+mongod --port 107 --dbpath "C:\Users\Administrator\Desktop\replication\data7" --replSet rs1
+rs.add({host:"localhost:107",slaveDelay:60*60,priority:0})
+
+mongo --port 107
+use
+
+Add a new 8th member
+mongod --port 108 --dbpath "C:\Users\Administrator\Desktop\replication\data8" --replSet rs1
+rs.add({host:"localhost:107",slaveDelay:60*60,priority:0})
+
+
+
+
+
+
+
+
+
+

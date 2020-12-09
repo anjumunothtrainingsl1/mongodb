@@ -1,0 +1,222 @@
+db.restaurant.find({"address.zipcode":"10462"})
+
+Docs which are in a latitude greater than 35
+db.restaurant.find({"address.coord.1":{$gt:35}})
+
+db.restaurant.find({"grades.score":{$gt:5}})
+//return the docs which have atleast one array element in the grades array 
+//which have a score greater than 5
+
+db.restaurant.find({"grades.3.score":{$gt:5}})
+
+db.restaurant.find({"grades.3.score":5})
+
+db.restaurant.find({$and:[
+{"grades.score":{$gt:5}},
+{"grades.grade":/z/i}]})
+// 101,102
+
+db.restaurant.find(
+{grades:{$elemMatch:{$and:[{"grades.score":{$gt:5},{"grades.grade":/z/i}]}}})
+//102
+
+{"_id":101,
+"address":{"building":"1839","coord":[-73.9482609,40.6408271],"street":"Nostrand Avenue",
+"zipcode":"11226"},"borough":"Brooklyn","cuisine":"Ice Cream, Gelato, Yogurt, Ices",
+"grades":
+[{"date":{"$date":"2014-07-14T00:00:00.000Z"},"grade":"A","score":12},
+{"date":{"$date":"2013-07-10T00:00:00.000Z"},"grade":"A","score":8},
+{"date":{"$date":"2012-07-11T00:00:00.000Z"},"grade":"Z","score":3},
+{"date":{"$date":"2012-02-23T00:00:00.000Z"},"grade":"A","score":8}],
+"name":"Taste The Tropics Ice Cream","restaurant_id":"40356731"}
+
+{"_id":102,
+"address":{"building":"1839","coord":[-73.9482609,40.6408271],"street":"Nostrand Avenue",
+"zipcode":"11226"},"borough":"Brooklyn","cuisine":"Ice Cream, Gelato, Yogurt, Ices",
+"grades":
+[{"date":{"$date":"2014-07-14T00:00:00.000Z"},"grade":"A","score":12},
+{"date":{"$date":"2013-07-10T00:00:00.000Z"},"grade":"A","score":8},
+{"date":{"$date":"2012-07-11T00:00:00.000Z"},"grade":"Z","score":7},
+{"date":{"$date":"2012-02-23T00:00:00.000Z"},"grade":"A","score":8}],
+"name":"Taste The Tropics Ice Cream","restaurant_id":"40356731"}
+
+
+Docs which have got a grade B on 16-9-2014
+db.restaurant.find({
+grades:{$elemMatch:{
+$and:[{grade:/b/i},{date:ISODate("2014-09-16T00:00:00.000Z")}]
+}
+}
+})
+
+
+db.emp.find().skip(3).limit(3);//104,105,106
+db.emp.find().limit(3).skip(3);//none; 104,105,106
+
+select * from emp where 
+
+db.emp.find({salary:{$gt:1500}},{empId:1})
+
+
+
+Update
+
+
+update
+updateOne
+updateMany
+
+db.emp.update({"empId":101},{$set:{empName:"Danny"}})
+db.emp.updateOne({"empId":101},{$set:{empName:"Danny"}})
+db.emp.updateMany({"empId":101},{$set:{empName:"Danny"}})
+
+db.emp.update({"salary":{$gt:1500}},{$set:{empName:"Veena"}});// one doc acc to insertion order
+db.emp.update({"salary":{$gt:1500}},{$set:{empName:"Veena"}},{multi:true});// update all docs
+db.emp.updateOne({"salary":{$gt:1500}},{$set:{empName:"Veena"}});//one doc
+db.emp.updateMany({"salary":{$gt:1500}},{$set:{empName:"Veena"}});//update all the doc
+
+
+db.emp.update({empId:101},{$set:{location:"PUNE"}})
+
+update emp set salary=salary+100 where empId=103
+
+db.emp.update({empId:103},{$inc:{salary:100}})
+db.emp.update({empId:104},{$inc:{salary:-100}})
+
+db.emp.update({empId:103},{$push:{hobbies:"h1"}})
+db.emp.update({empId:103},{$push:{hobbies:{$each:["h7","h8"]}}})
+
+db.emp.update({empId:103},{$pop:{hobbies:1}})
+
+update on an array element on basis of position
+
+db.emp.update({hobbies:"h101"},{$pull:{"hobbies.$":"h101"}})
+
+select sum(pop) as "SumPop" from zipcode where state="MA"
+
+Aggregation pipeline
+
+Output of 1st stage becomes the input of 2nd stage
+
+db.zipcode.aggregate([
+{$match:{state:"MA"}},
+{$group:
+	{
+	_id:null,
+	"SumPop":{$sum:"$pop"}
+}
+}])
+
+db.zipcode.aggregate([{$match: {
+  state:"MA"
+}}, {$group: {
+  _id: null,
+  "SUMPOP": {
+    $sum: "$pop"
+  }
+}}])
+
+
+
+select sum(pop),count(*) as SUMPOP from zipcode group by state
+db.zipcode.aggregate([
+{$group:
+{
+	_id:"$state",
+	"SUMPOP":{$sum:"$pop"}
+}
+}])
+
+
+{
+  _id: "$state",
+  "SUMPOP": {
+    "$sum": "$pop"
+  },
+  "AvgPop":{"$avg":"$pop"},
+  "MaxPop":{$max:"$pop"},
+  "MinPop":{$min:"$pop"},
+  "CountOfDocs":{$sum:1}
+}
+
+
+
+
+select sum(pop) from zipcode group by state,city
+{
+  _id: {"f1":"$state","field2":"$city"},
+  "SumPop": {
+    $sum:"$pop"
+  }
+}
+
+Project stage:
+{
+  city:1,
+  state:1,
+  "NewState":{$toLower:"$state"},
+  "NewArea":{$concat:["$state","_","$city"]},
+  "Today's date":{$dayOfYear:new Date()}
+  
+}
+
+
+
+select sum(pop),city from zipcode where pop>100 group by state,city having sum(pop)>1000
+
+
+db.zipcode.aggregate([
+{$group:
+{
+  _id: {"f1":"$state","field2":"$city"},
+  "SumPop": {
+    $sum:"$pop"
+  }
+}
+},
+{$match:
+}])
+
+
+$match
+$project
+group
+sort
+skip
+limit
+count
+out
+
+
+Total score got by a particular restaurant
+[{$match: {
+  restaurant_id:"30075445"
+}}, {$unwind: {
+  path: "$grades",
+  includeArrayIndex: "Array Position in Grades Array",
+  preserveNullAndEmptyArrays: true
+}}, {$group: {
+  _id: null,
+  "SumOfScores": {
+    $sum: "$grades.score"
+  }
+}}]
+
+
+Total score of each restaurant
+
+
+Left outer join:
+emp,dept
+
+select * from emp left outer join dept on emp.departmentId=dept.dId
+
+
+
+
+
+
+
+
+
+

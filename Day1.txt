@@ -1,0 +1,174 @@
+db.emp.insertMany([
+{empId:103,empName:"Ganesh",salary:880},
+{empId:104,empName:"sita",salary:1880},
+{empId:105,empName:"geeta",salary:4880}])
+
+db.emp.insertOne({empId:106,empName:"Suraj",salary:880})
+
+db.emp.insertMany([
+{empId:107,empName:"Ganesh",salary:880},
+{empId:108,empName:"sita",salary:1880,_id:102},
+{empId:109,empName:"geeta",salary:4880}])
+
+107 -->1
+
+
+db.emp.insertOne({empId:106,empName:"Suraj",salary:880})
+insert
+
+db.emp.insertOne({empId:110,empName:"Suraj",salary:880,deptId:"D1"})
+
+
+db.emp.insertOne({bookId:"B101",rating:5.5,price:8798})
+
+db.emp.insertOne({empId:110,empName:"Suraj",salary:880,projects:["Pay management","All phases Management"]})
+
+
+
+
+
+select * from emp
+
+db.emp.find()
+
+select * from emp where empId=101
+
+db.emp.find({empId:101})
+
+select * from emp where salary>500
+
+db.emp.find({salary:{$gt:500}})
+
+select * from emp where salary<1000
+db.emp.find({salary:{$lt:500}})
+
+$gt, $lt, $gte, $lte, $ne, $eq
+
+$and, $or, $not
+
+And:
+db.emp.find({empId:101,salary:{$gt:500}})
+
+db.emp.find({
+$and:[{empId:101},{salary:{$gt:500}}]
+})
+
+db.emp.find({salary:{$gt:500,$lt:1500}}
+
+
+$in:
+db.emp.find({empId:{$in:[101,103,104,105]}})
+
+A.
+db.emp.find({empId:{$in:[101,103,104,105]},salary:{$gt:1500}})
+
+B.
+db.emp.find({
+$and:[{empId:{$in:[101,103,104,105]}},{salary:{$gt:1500}}]
+})
+
+
+$or:
+db.emp.find({
+$or:[{empId:{$in:[101,103,104,105]}},{salary:{$gt:1500}}]
+})
+
+
+$not
+db.emp.find({salary:{$not:{$gt:500}}})
+
+
+$exists, $type
+docs which have salary field exists
+db.emp.find({salary:{$exists:true}})
+
+docs which do not have salary field
+db.emp.find({salary:{$not:{$exists:true}}})
+
+docs where salary is null or non existence of field salary
+db.emp.find({salary:null})
+
+docs where salary is null
+//db.emp.find({salary:null,salary:{$exists:true}})
+A.
+db.emp.find({$and:[{salary:null},{salary:{$exists:true}}]})
+B.
+db.emp.find({salary:{$type:10}})
+
+db.emp.find({_id:{$type:7}})
+
+_id -- immutable 
+
+Arrays 
+
+loc : {$gt:42}
+
+Position
+loc.0
+loc.1
+
+
+
+db.students.insertMany([
+{studId:101,marks:[10,20,30]},
+{studId:102,marks:[30,20,10]},
+{studId:103,marks:[16,20,30]},
+{studId:104,marks:[7,80,90]},
+{studId:105,marks:[10,55,30]},
+{studId:106,marks:[75,85,95]}
+])
+
+
+db.students.find({marks:{$gt:35,$lt:60}});//104,105
+
+
+
+db.students.find({$and:[{marks:{$gt:35},marks:{$lt:60}}]}); // 104, 105,101,102,103; 
+104,105,106
+101,102,103,104,105
+
+
+One element can match one condition and another element can match another condition
+
+db.students.find({marks:{$all:[10,20,30]}});//101,102; 
+
+db.students.find({marks:{$all:[10,20]}});// 101,102
+
+db.students.find({marks:30});//101,102,103,105
+
+db.students.find({marks:[30]});// none;
+
+db.students.find({marks:[10,20,30]});// 101; 
+
+db.students.find({marks:{$gt:35}}); // 104,105,106
+
+db.students.find({marks:{$gt:35},marks:{$lt:60}}); // 101,102,103,104,105 
+
+db.students.find({marks:{$lt:60},marks:{$gt:35}}); //104,105,106
+
+db.students.find({$and:[{marks:{$gt:35},marks:{$lt:60}}]}); // 104, 105,101,102,103; 
+
+db.students.find({marks:{$gt:30,$lt:60}});//104,105
+db.students.find({marks:{$elemMatch:{$gt:30,$lt:60}}});// 105
+
+db.students.insert({studId:107,marks:[45,55,95]})
+
+db.students.find({marks:{$elemMatch:{$gt:30,$lt:60}}});// 105,107
+A single element should match both conditions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
