@@ -1,0 +1,108 @@
+verbosity modes:
+1. queryPlanner
+2. executionStats
+3. allPlansExecutions
+
+
+Emp collection
+
+Indexes:empId_1; empName_1
+Create a new index empId_1_empName_-1 --> Affect the collection; locks the collection
+
+Drop any index --- Not affect my collection
+
+
+{loc:[-72.622739,42.070206]}
+
+db.zipcode.find({$or:[{"loc":-72.622739},{state:"AK"}]}).hint("loc_1").explain()
+
+
+Config server PSS
+201,data1,cs1 --configsvr
+202,data2,cs1 --configsvr
+203,data3,cs1 --configsvr
+
+
+mongod --port 201 --dbpath C:\Users\Administrator\Desktop\sharding\data1 --replSet cs1 --configsvr
+
+mongod --port 202 --dbpath C:\Users\Administrator\Desktop\sharding\data2 --replSet cs1 --configsvr
+
+mongod --port 203 --dbpath C:\Users\Administrator\Desktop\sharding\data3 --replSet cs1 --configsvr
+
+
+rs.initiate({
+_id:"cs1",
+members:[{_id:0,"host":"localhost:201"},{_id:1,"host":"localhost:202"},{_id:2,"host":"localhost:203"}]
+})
+
+
+Shard server 1:PSS
+mongod --port 301 --dbpath C:\Users\Administrator\Desktop\sharding\data4 --replSet s1 --shardsvr
+
+mongod --port 302 --dbpath C:\Users\Administrator\Desktop\sharding\data5 --replSet s1 --shardsvr
+
+mongod --port 303 --dbpath C:\Users\Administrator\Desktop\sharding\data6 --replSet s1 --shardsvr
+
+
+rs.initiate({
+_id:"s1",
+members:[{_id:0,"host":"localhost:301"},{_id:1,"host":"localhost:302"},{_id:2,"host":"localhost:303"}]
+})
+
+
+Shard server 2:PSS
+mongod --port 401 --dbpath C:\Users\Administrator\Desktop\sharding\data7 --replSet s2 --shardsvr
+
+mongod --port 402 --dbpath C:\Users\Administrator\Desktop\sharding\data8 --replSet s2 --shardsvr
+
+mongod --port 403 --dbpath C:\Users\Administrator\Desktop\sharding\data9 --replSet s2 --shardsvr
+
+
+rs.initiate({
+_id:"s2",
+members:[{_id:0,"host":"localhost:401"},{_id:1,"host":"localhost:402"},{_id:2,"host":"localhost:403"}]
+})
+
+
+
+Now create mongos
+Port :500
+configdb : cs1/localhost:201
+
+mongos --port 500 --configdb cs1/localhost:201
+
+mongo --port 500
+
+sh.addShard("s1/localhost:301")
+sh.addShard("s1/localhost:302")
+sh.addShard("s1/localhost:303")
+sh.addShard("s2/localhost:401")
+sh.addShard("s2/localhost:402")
+sh.addShard("s2/localhost:403")
+
+
+mongoexport --port 27017 --db vodafoneDb --collection zipcode --out "C:\Users\Administrator\Desktop\zipcode.json" -q='{"state":"MA"}'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
